@@ -59,7 +59,7 @@ typedef struct Rect
 } Rect;
 
 bool is_rect_colliding(Rect rect1, Rect rect2);
-
+Rectangle make_rectangle(float h, float w, float x, float y);
 int main(void)
 {
 
@@ -69,11 +69,7 @@ int main(void)
 
 start:
 
-    Rectangle start_box;
-    start_box.height = 100;
-    start_box.width = 200;
-    start_box.x = WINDOW_CENTER - start_box.width / 2;
-    start_box.y = WINDOW_CENTER - start_box.height;
+    Rectangle start_box = make_rectangle(100, 200, WINDOW_CENTER - start_box.width / 2, WINDOW_CENTER - start_box.height);
 
     Rectangle quit_box;
     quit_box.height = 100;
@@ -408,6 +404,7 @@ start:
     return 0;
 }
 
+// Functions
 bool is_rect_colliding(Rect a, Rect b)
 {
 
@@ -415,4 +412,16 @@ bool is_rect_colliding(Rect a, Rect b)
            a.x + a.w >= b.x &&
            a.y <= b.y + b.h &&
            a.y + a.h >= b.y;
+}
+
+Rectangle make_rectangle(float h, float w, float x, float y)
+{
+
+    Rectangle rect;
+    rect.height = h;
+    rect.width = w;
+    rect.x = x;
+    rect.y = y;
+
+    return rect;
 }
