@@ -25,6 +25,9 @@ const int BALL_WIDTH = 20;
 const float BALL_SPEED = 5.00;
 const float PADDLE_SPEED = 10.00;
 
+// Score
+const int WINNING_SCORE = 2;
+
 typedef struct Vector2D
 {
     float x;
@@ -64,6 +67,8 @@ int main(void)
 
     SetTargetFPS(60);
 
+start:
+
     Rectangle start_box;
     start_box.height = 100;
     start_box.width = 200;
@@ -76,9 +81,10 @@ int main(void)
     quit_box.x = WINDOW_CENTER - quit_box.width / 2;
     quit_box.y = WINDOW_CENTER + 20;
 
-    while (true)
+    while (!WindowShouldClose())
     {
         BeginDrawing();
+        ClearBackground(BLACK);
         DrawText("LEXI PONG", WINDOW_CENTER - 135, 200, 50, WHITE);
 
         int start_game = GuiButton(start_box, "Start Game");
@@ -365,16 +371,37 @@ int main(void)
         }
 
         // Player wins
-        if (player_one_score >= 10)
+        if (player_one_score >= WINNING_SCORE)
         {
-            DrawText("Player One has won the game", WINDOW_CENTER + 20, WINDOW_CENTER, 20, PURPLE);
+
+            break;
         }
 
-        if (player_two_score >= 10)
+        if (player_two_score >= WINNING_SCORE)
         {
-            DrawText("Player two has won the game", WINDOW_CENTER + 20, WINDOW_CENTER, 20, PURPLE);
+
+            break;
         }
     }
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText(TextFormat("%d", player_one_score), 200, 20, 50, WHITE);
+    DrawText(TextFormat("%d", player_two_score), 600, 20, 50, WHITE);
+
+    if (player_one_score > player_two_score)
+    {
+        DrawText("Player One has won the game", WINDOW_CENTER - 140, WINDOW_CENTER, 20, PURPLE);
+    }
+    else
+    {
+        DrawText("Player two has won the game", WINDOW_CENTER - 140, WINDOW_CENTER, 20, PURPLE);
+    }
+
+    EndDrawing();
+    WaitTime(3.0);
+
+    goto start;
 
     CloseWindow();
 
