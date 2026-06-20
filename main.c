@@ -25,108 +25,59 @@ const int BALL_WIDTH = 20;
 const float BALL_SPEED = 5.00;
 const float PADDLE_SPEED = 10.00;
 
+// Button
+const int BUTTON_HEIGHT = 100;
+const int BUTTON_WIDTH = 200;
+
 // Score
 const int WINNING_SCORE = 2;
 
-typedef struct Vector2D
-{
-    float x;
-    float y;
-} Vector2D;
-
 typedef struct Ball
 {
-    Vector2D position;
-    Vector2D direction;
+    Vector2 position;
+    Vector2 direction;
 } Ball;
 
 typedef struct Paddle
 {
-    Vector2D postion;
-    Vector2D direction;
+    Vector2 postion;
+    Vector2 direction;
     int keycode_up;
     int keycode_down;
 
 } Paddle;
 
-typedef struct Rect
-{
-    float h;
-    float w;
-    float x;
-    float y;
-
-} Rect;
-
-bool is_rect_colliding(Rect rect1, Rect rect2);
+bool is_rect_colliding(Rectangle rect1, Rectangle rect2);
 Rectangle make_rectangle(float h, float w, float x, float y);
+Vector2 make_vector2(float x, float y);
+Paddle make_paddle(Vector2 postion, Vector2 direction, int keycode_up, int keycode_down);
+int main_menu();
+int draw_button(char *title, float h, float w, float x, float y);
+
 int main(void)
 {
-
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Pong");
-
     SetTargetFPS(60);
 
 start:
-
-    Rectangle start_box = make_rectangle(100, 200, WINDOW_CENTER - start_box.width / 2, WINDOW_CENTER - start_box.height);
-
-    Rectangle quit_box;
-    quit_box.height = 100;
-    quit_box.width = 200;
-    quit_box.x = WINDOW_CENTER - quit_box.width / 2;
-    quit_box.y = WINDOW_CENTER + 20;
-
-    while (!WindowShouldClose())
+    int should_quit = main_menu();
+    if (should_quit)
     {
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawText("LEXI PONG", WINDOW_CENTER - 135, 200, 50, WHITE);
-
-        int start_game = GuiButton(start_box, "Start Game");
-        int end_game = GuiButton(quit_box, "Quit");
-
-        if (end_game)
-        {
-            CloseWindow();
-            return 0;
-        }
-
-        if (start_game)
-        {
-
-            break;
-        }
-        EndDrawing();
+        CloseWindow();
+        return 0;
     }
 
     Ball ball;
-    ball.position.x = WINDOW_CENTER;
-    ball.position.y = WINDOW_CENTER;
-    ball.direction.x = GetRandomValue(1, 2);
-    ball.direction.y = 0;
+    ball.position = make_vector2(WINDOW_CENTER, WINDOW_CENTER);
+
+    int random_direction = GetRandomValue(1, 2);
+    ball.direction = make_vector2(random_direction, 0);
 
     float ball_speed = BALL_SPEED; // Ball speed mod;
+    Vector2 ballVelocity = make_vector2(ball.direction.x * ball_speed, ball.direction.y * ball_speed);
 
-    Vector2D ballVelocity;
-    ballVelocity.x = ball.direction.x * ball_speed;
-    ballVelocity.y = ball.direction.y * ball_speed;
-
-    Paddle leftPaddle;
-    leftPaddle.postion.x = 20;
-    leftPaddle.postion.y = (WINDOW_CENTER)-50;
-    leftPaddle.keycode_up = KEY_W;
-    leftPaddle.keycode_down = KEY_S;
-    leftPaddle.direction.x = 0;
-    leftPaddle.direction.y = 0;
-
-    Paddle rightPaddle;
-    rightPaddle.postion.x = WINDOW_SIZE - 40;
-    rightPaddle.postion.y = (WINDOW_CENTER)-50;
-    rightPaddle.keycode_up = KEY_UP;
-    rightPaddle.keycode_down = KEY_DOWN;
-    rightPaddle.direction.x = 0;
-    rightPaddle.direction.y = 0;
+    Paddle leftPaddle = make_paddle(make_vector2(20, WINDOW_CENTER - 50), make_vector2(0, 0), KEY_W, KEY_S);
+    Paddle rightPaddle = make_paddle(make_vector2(WINDOW_SIZE - 40, WINDOW_CENTER - 50), make_vector2(0, 0), KEY_UP, KEY_DOWN);
 
     int player_one_score = 0;
     int player_two_score = 0;
@@ -157,9 +108,7 @@ start:
         DrawText(TextFormat("%d", player_two_score), 600, 20, 50, WHITE);
 
         DrawRectangle(ball.position.x, ball.position.y, BALL_WIDTH, BALL_HEIGHT, WHITE);
-
         DrawRectangle(leftPaddle.postion.x, leftPaddle.postion.y, PADDLE_WIDTH, PADDLE_HEIGHT, WHITE);
-
         DrawRectangle(rightPaddle.postion.x, rightPaddle.postion.y, PADDLE_WIDTH, PADDLE_HEIGHT, WHITE);
 
         EndDrawing();
@@ -215,23 +164,11 @@ start:
             }
         }
 
-        Rect rect_ball;
-        rect_ball.h = BALL_HEIGHT;
-        rect_ball.w = BALL_WIDTH;
-        rect_ball.x = ball.position.x;
-        rect_ball.y = ball.position.y;
+        Rectangle rect_ball = make_rectangle(BALL_HEIGHT, BALL_WIDTH, ball.position.x, ball.position.y);
 
-        Rect rect_left_paddle;
-        rect_left_paddle.h = PADDLE_HEIGHT - PADDLE_TIP_HEIGHT;
-        rect_left_paddle.w = PADDLE_WIDTH;
-        rect_left_paddle.x = leftPaddle.postion.x;
-        rect_left_paddle.y = leftPaddle.postion.y;
+        Rectangle rect_left_paddle = make_rectangle(PADDLE_HEIGHT - PADDLE_TIP_HEIGHT, PADDLE_WIDTH, leftPaddle.postion.x, leftPaddle.postion.y);
 
-        Rect rect_right_paddle;
-        rect_right_paddle.h = PADDLE_HEIGHT;
-        rect_right_paddle.w = PADDLE_WIDTH;
-        rect_right_paddle.x = rightPaddle.postion.x;
-        rect_right_paddle.y = rightPaddle.postion.y;
+        Rectangle rect_right_paddle = make_rectangle(PADDLE_HEIGHT, PADDLE_WIDTH, rightPaddle.postion.x, rightPaddle.postion.y);
 
         // Ball and paddle collision
         if (is_rect_colliding(rect_ball, rect_left_paddle))
@@ -239,17 +176,10 @@ start:
             ball.direction.x = RIGHT;
             ball.direction.y *= -1;
 
-            Rect paddle_top_tip;
-            paddle_top_tip.h = PADDLE_HEIGHT - PADDLE_TIP_HEIGHT;
-            paddle_top_tip.w = PADDLE_WIDTH;
-            paddle_top_tip.x = rect_left_paddle.x;
-            paddle_top_tip.y = rect_left_paddle.y;
+            Rectangle paddle_top_tip = make_rectangle(PADDLE_HEIGHT - PADDLE_TIP_HEIGHT, PADDLE_WIDTH, rect_left_paddle.x, rect_left_paddle.y);
 
-            Rect paddle_bottom_tip;
-            paddle_bottom_tip.h = PADDLE_HEIGHT - PADDLE_TIP_HEIGHT;
-            paddle_bottom_tip.w = PADDLE_WIDTH;
-            paddle_bottom_tip.x = rect_left_paddle.x;
-            paddle_bottom_tip.y = rect_left_paddle.y + PADDLE_HEIGHT - PADDLE_TIP_HEIGHT;
+            Rectangle paddle_bottom_tip = make_rectangle(PADDLE_HEIGHT - PADDLE_TIP_HEIGHT, PADDLE_WIDTH, rect_left_paddle.x, rect_left_paddle.y + PADDLE_HEIGHT - PADDLE_TIP_HEIGHT);
+
             // ball hits left paddle top
             if (is_rect_colliding(rect_ball, paddle_top_tip))
             {
@@ -282,20 +212,11 @@ start:
             ball.direction.y *= -1;
             ball_speed += 0.5;
 
-            Rect paddle_top_tip;
-            paddle_top_tip.h = PADDLE_TIP_HEIGHT;
-            paddle_top_tip.w = PADDLE_WIDTH;
-            paddle_top_tip.x = rect_right_paddle.x;
-            paddle_top_tip.y = rect_right_paddle.y;
-
-            Rect paddle_bottom_tip;
-            paddle_bottom_tip.h = PADDLE_TIP_HEIGHT;
-            paddle_bottom_tip.w = PADDLE_WIDTH;
-            paddle_bottom_tip.x = rect_right_paddle.x;
-            paddle_bottom_tip.y = paddle_bottom_tip.y + PADDLE_HEIGHT - PADDLE_TIP_HEIGHT;
+            Rectangle paddle_top_tip = make_rectangle(PADDLE_TIP_HEIGHT, PADDLE_WIDTH, rect_right_paddle.x, rect_right_paddle.y);
+            Rectangle paddle_bottom_tip = make_rectangle(PADDLE_TIP_HEIGHT, PADDLE_WIDTH, rect_right_paddle.x, rect_right_paddle.y + PADDLE_HEIGHT - PADDLE_TIP_HEIGHT);
 
             // ball hits right paddle top
-            if (is_rect_colliding(rect_ball, paddle_bottom_tip))
+            if (is_rect_colliding(rect_ball, paddle_top_tip))
             {
                 ball.direction.x = LEFT;
                 ball.direction.y = UP;
@@ -351,6 +272,7 @@ start:
         if (ball.position.y <= TOP_BOUNDARY)
         {
             ball.position.y = TOP_BOUNDARY;
+
             ball.direction.y = DOWN;
 
             ballVelocity.x = ball.direction.x * ball_speed;
@@ -360,6 +282,7 @@ start:
         if (ball.position.y + BALL_HEIGHT >= BOTTOM_BOUNDARY)
         {
             ball.position.y = BOTTOM_BOUNDARY - BALL_HEIGHT;
+
             ball.direction.y = UP;
 
             ballVelocity.x = ball.direction.x * ball_speed;
@@ -369,13 +292,11 @@ start:
         // Player wins
         if (player_one_score >= WINNING_SCORE)
         {
-
             break;
         }
 
         if (player_two_score >= WINNING_SCORE)
         {
-
             break;
         }
     }
@@ -405,13 +326,13 @@ start:
 }
 
 // Functions
-bool is_rect_colliding(Rect a, Rect b)
+bool is_rect_colliding(Rectangle a, Rectangle b)
 {
 
-    return a.x <= b.x + b.w &&
-           a.x + a.w >= b.x &&
-           a.y <= b.y + b.h &&
-           a.y + a.h >= b.y;
+    return a.x <= b.x + b.width &&
+           a.x + a.width >= b.x &&
+           a.y <= b.y + b.height &&
+           a.y + a.height >= b.y;
 }
 
 Rectangle make_rectangle(float h, float w, float x, float y)
@@ -425,3 +346,56 @@ Rectangle make_rectangle(float h, float w, float x, float y)
 
     return rect;
 }
+
+Vector2 make_vector2(float x, float y)
+{
+
+    Vector2 vec;
+    vec.x = x;
+    vec.y = y;
+
+    return vec;
+}
+Paddle make_paddle(Vector2 pos, Vector2 dir, int keycode_up, int keycode_down)
+{
+
+    Paddle paddle;
+    paddle.postion = pos;
+    paddle.direction = dir;
+    paddle.keycode_up = keycode_up;
+    paddle.keycode_down = keycode_down;
+    return paddle;
+}
+
+int draw_button(char *title, float h, float w, float x, float y)
+{
+    Rectangle rect = make_rectangle(h, w, x, y);
+    int was_pressed = GuiButton(rect, title);
+    return was_pressed;
+}
+
+// returns 1 if should quit
+int main_menu()
+{
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("LEXI PONG", WINDOW_CENTER - 135, 200, 50, WHITE);
+
+        int start_game = draw_button("Start Game", BUTTON_HEIGHT, BUTTON_WIDTH, WINDOW_CENTER - BUTTON_WIDTH / 2, WINDOW_CENTER - BUTTON_HEIGHT);
+        int end_game = draw_button("Quit", BUTTON_HEIGHT, BUTTON_WIDTH, WINDOW_CENTER - BUTTON_WIDTH / 2, WINDOW_CENTER + 20);
+
+        if (end_game)
+        {
+            return 1;
+        }
+
+        if (start_game)
+        {
+            return 0;
+        }
+
+        EndDrawing();
+    }
+};
