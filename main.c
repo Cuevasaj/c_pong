@@ -53,6 +53,7 @@ Vector2 make_vector2(float x, float y);
 Paddle make_paddle(Vector2 postion, Vector2 direction, int keycode_up, int keycode_down);
 int main_menu();
 int draw_button(char *title, float h, float w, float x, float y);
+int get_rand_x_dir();
 
 int main(void)
 {
@@ -69,10 +70,7 @@ start:
 
     Ball ball;
     ball.position = make_vector2(WINDOW_CENTER, WINDOW_CENTER);
-
-    int random_direction = GetRandomValue(1, 2);
-    ball.direction = make_vector2(random_direction, 0);
-
+    ball.direction = make_vector2(get_rand_x_dir(), 0);
     float ball_speed = BALL_SPEED; // Ball speed mod;
     Vector2 ballVelocity = make_vector2(ball.direction.x * ball_speed, ball.direction.y * ball_speed);
 
@@ -82,19 +80,8 @@ start:
     int player_one_score = 0;
     int player_two_score = 0;
 
-    if (ball.direction.x == 1)
-    {
-        ball.direction.x = -1;
-    }
-    if (ball.direction.x == 2)
-    {
-        ball.direction.x = 1;
-    }
-
     while (!WindowShouldClose())
     {
-
-        //
         bool left_moving_up = false;
         bool left_moving_down = false;
         bool right_moving_up = false;
@@ -356,6 +343,7 @@ Vector2 make_vector2(float x, float y)
 
     return vec;
 }
+
 Paddle make_paddle(Vector2 pos, Vector2 dir, int keycode_up, int keycode_down)
 {
 
@@ -399,3 +387,14 @@ int main_menu()
         EndDrawing();
     }
 };
+
+int get_rand_x_dir()
+{
+    int random = GetRandomValue(1, 2);
+    if (random == 1)
+    {
+        return LEFT;
+    }
+
+    return RIGHT;
+}
